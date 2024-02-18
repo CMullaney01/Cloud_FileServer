@@ -1,5 +1,5 @@
 # Cloud_FileServer
-Extending the File Server project to make more use of the cloud. Please read the roadmap below
+Extending the File Server project written in Go to make more use of the cloud. Please read the roadmap below, for each MileStone there should be a relevant folder in research which explains the decisions.
 
 
 # Project Roadmap
