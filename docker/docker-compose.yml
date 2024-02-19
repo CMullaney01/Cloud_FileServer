@@ -8,13 +8,14 @@ services:
     image: mariadb:10.6.13
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     environment:
-      MYSQL_ROOT_PASSWORD: abcXYZ123$
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     volumes:
       - ./sql:/docker-entrypoint-initdb.d
       - mariadb-server-vol:/var/lib/mysql
     networks:
-      - demo-network
+      - auth-service-network
 
+  # Helps visualise and manage what happens on maria db
   phpMyAdmin:
     image: phpmyadmin/phpmyadmin:5.2.1
     depends_on:
@@ -26,40 +27,41 @@ services:
     ports:
       - 8180:80
     networks:
-      - demo-network
+      - auth-service-network
 
+  # will block until sql setup
   start_dependencies:
     image: dadarek/wait-for-dependencies
     depends_on:
       - phpMyAdmin
     command: mariadb-server:3306
     networks:
-      - demo-network
+      - auth-service-network
 
 
   keycloak:
     image: quay.io/keycloak/keycloak:21.1.1    
     ports:
       - 8181:8080
-    # for the import we also need the --import-realm stuff
+    # for the import we also need the --import-realm when importing
     command: -v start-dev --import-realm
     environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin123
+      KEYCLOAK_ADMIN: cmullaney
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
       KC_DB: mariadb
       KC_DB_URL_HOST: mariadb-server
       KC_DB_URL_DATABASE: keycloak
       KC_DB_URL_PORT: 3306
       KC_DB_USERNAME: keycloak_user
-      KC_DB_PASSWORD: xyz123ABC$
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD}
     # we add this part to import the keycloack json file
     volumes:
       - ./keycloak:/opt/keycloak/data/import
     networks:
-      - demo-network
+      - auth-service-network
 
 networks:
-  demo-network:
+  auth-service-network:
 
 volumes:
   mariadb-server-vol:
