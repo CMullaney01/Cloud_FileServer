@@ -28,6 +28,7 @@ func NewIdentityManager() *identityManager {
 	}
 }
 
+// logs in this backend client
 func (im *identityManager) loginRestApiClient(ctx context.Context) (*gocloak.JWT, error) {
 	client := gocloak.NewClient(im.baseUrl)
 
