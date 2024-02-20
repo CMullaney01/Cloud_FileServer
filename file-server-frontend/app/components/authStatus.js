@@ -49,15 +49,7 @@ export default function AuthStatus() {
       <button
         className="bg-blue-900 font-bold text-white py-1 px-2 rounded border border-gray-50"
         onClick={() => {
-          console.log("AUTH_FRONTEND_CLIENT_ID:", process.env.AUTH_FRONTEND_CLIENT_ID);
-          console.log("AUTH_FRONTEND_CLIENT_SECRET:", process.env.AUTH_FRONTEND_CLIENT_SECRET);
-          console.log("AUTH_ISSUER:", process.env.AUTH_ISSUER);
-          console.log("NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
-          console.log("NEXTAUTH_SECRET:", process.env.NEXTAUTH_SECRET);
-          console.log("END_SESSION_URL:", process.env.END_SESSION_URL);
-          console.log("AUTH_BACKEND_URL:", process.env.AUTH_BACKEND_URL);
-          console.log("REFRESH_TOKEN_URL:", process.env.REFRESH_TOKEN_URL);
-            // signIn("keycloak")
+            signIn("keycloak")
           }}>
         Log in
       </button>
