@@ -44,5 +44,5 @@ func InitProtectedRoutes(app *fiber.App) {
 
 	// auths for if we didnt need role-based auth
 	uploadFileUseCase := filemgmtuc.NewFileUploadUseCase(filesDataStore)
-	grp.Post("/products", handlers.UploadFileHandler(uploadFileUseCase))
+	grp.Post("/files", handlers.UploadFileHandler(uploadFileUseCase))
 }
