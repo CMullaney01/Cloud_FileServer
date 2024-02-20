@@ -45,7 +45,7 @@ func (uc *uploadFileUseCase) UploadFile(ctx context.Context, request UploadFileR
 		Path:        request.Path,
 	}
 
-	err = uc.fileStore.UploadFile(file)
+	err = uc.fileStore.Upload(file)
 	if err != nil {
 		return nil, err
 	}

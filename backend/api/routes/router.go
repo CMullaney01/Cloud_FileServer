@@ -5,6 +5,7 @@ import (
 	"backend/api/middlewares"
 	"backend/infrastructure/datastores"
 	"backend/infrastructure/identity"
+	"backend/use_cases/filemgmtuc"
 	"backend/use_cases/productsuc"
 	"backend/use_cases/usermgmtuc"
 
@@ -39,10 +40,9 @@ func InitProtectedRoutes(app *fiber.App) {
 	grp.Get("/products", middlewares.NewRequiresRealmRole("viewer"),
 		handlers.GetProductsHandler(getProductsUseCase))
 
-	// auths for if we didnt need role-based auth
-	// createProductUseCase := productsuc.NewCreateProductUseCase(productsDataStore)
-	// grp.Post("/products", handlers.CreateProductHandler(createProductUseCase))
+	filesDataStore := datastores.NewFilesDataStore()
 
-	// getProductsUseCase := productsuc.NewGetProductsUseCase(productsDataStore)
-	// grp.Get("/products",	handlers.GetProductsHandler(getProductsUseCase))
+	// auths for if we didnt need role-based auth
+	uploadFileUseCase := filemgmtuc.NewFileUploadUseCase(filesDataStore)
+	grp.Post("/products", handlers.UploadFileHandler(uploadFileUseCase))
 }

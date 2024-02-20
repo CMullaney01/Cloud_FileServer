@@ -5,7 +5,7 @@ import (
 )
 
 type FileUploadDownload interface {
-	ListFiles() []entities.File
-	DownloadFile() entities.File
-	UploadFile(file *entities.File) error
+	// List() []entities.File
+	// Download() entities.File
+	Upload(file *entities.File) error
 }
