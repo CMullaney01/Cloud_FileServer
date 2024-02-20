@@ -1,25 +1,32 @@
 # Cloud_FileServer
-Extending the File Server project written in Go to make more use of the cloud. Please read the roadmap below, for each MileStone there should be a relevant folder in research which explains the decisions.
+Extending the File Server project written in Go to make more use of the cloud. Please read the roadmap below, for more information on the design choices please look at the research folder.
 
 
 # Project Roadmap
 
-## 🚀 In Progress: Milestone 1: Authentication and Login
-- Implement user authentication using a secure method like OAuth or JWT.
+<font color="green">
+## ✅ Completed: Milestone 1: Authentication and Login
+</font>
+- Identified keycloak as an appropriate auth service. 
 - Set up a user database to store user credentials securely.
 - Develop a login page and authentication API endpoints.
+- Able to implement access control here with keycloak by protecting end points as such we have removed that milestone
+If you are looking to get started on keycloak yourself, I folowed a great tutorial https://www.youtube.com/watch?v=1u8GlfKyB_Q&t=810s.
 
-## File Upload and Storage:
+### current setup
+![Example Image](research/images/auth-login.png)
+
+<font color="orange">
+## 🚀 In Progress: File Upload and Storage:
+</font>
 - Allow users to upload files to the server.
-- Integrate cloud storage services like Amazon S3, Google Cloud Storage, or Azure Blob Storage for storing uploaded files securely.
+- upload meta data to the maria db which will hold file url and sign the URL before passing it back to the client.
+- Integrate cloud storage on Amazon S3 service 
+- Make it look good!
 
 ## File Management:
 - Develop APIs for file management operations such as create, read, update, and delete (CRUD) operations on files.
 - Implement file organization features like folders or directories.
-
-## Access Control:
-- Define access control policies to restrict or grant access to files based on user roles or permissions.
-- Implement role-based access control (RBAC) to manage user permissions effectively.
 
 ## File Sharing:
 - Enable users to share files or folders with other users.
@@ -29,9 +36,9 @@ Extending the File Server project written in Go to make more use of the cloud. P
 - Implement version control for files to keep track of changes over time.
 - Allow users to revert to previous versions if needed.
 
-## Search and Metadata:
+## Search:
 - Develop search functionality to allow users to search for files based on metadata or content.
-- Implement metadata management for files, such as tags or descriptions.
+
 
 ## Video Streaming:
 - Integrate video streaming capabilities to allow users to stream video files stored on the server.
