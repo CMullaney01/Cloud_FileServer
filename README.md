@@ -4,31 +4,33 @@ Extending the File Server project written in Go to make more use of the cloud. P
 
 # Project Roadmap
 
-<font color="green">
 ## ✅ Completed: Milestone 1: Authentication and Login
-</font>
+
 - Identified keycloak as an appropriate auth service. 
 - Set up a user database to store user credentials securely.
 - Develop a login page and authentication API endpoints.
 - Able to implement access control here with keycloak by protecting end points as such we have removed that milestone
-If you are looking to get started on keycloak yourself, I folowed a great tutorial https://www.youtube.com/watch?v=1u8GlfKyB_Q&t=810s.
+If you are looking to get started on keycloak yourself, I folowed a great tutorial [here](https://www.youtube.com/watch?v=1u8GlfKyB_Q&t=810s).
 
 ### current setup
+
 ![Example Image](research/images/auth-login.png)
 
-<font color="orange">
+
 ## 🚀 In Progress: File Upload and Storage:
-</font>
+
 - Allow users to upload files to the server.
-- upload meta data to the maria db which will hold file url and sign the URL before passing it back to the client.
+- upload meta data to the db which will hold file url and sign the URL before passing it back to the client.
 - Integrate cloud storage on Amazon S3 service 
 - Make it look good!
 
-## File Management:
-- Develop APIs for file management operations such as create, read, update, and delete (CRUD) operations on files.
-- Implement file organization features like folders or directories.
+### project setup goal
 
-## File Sharing:
+![Example Image](research/images/file-storage.png)
+
+
+## File Management and Sharing:
+- Implement file organization features like folders or directories.
 - Enable users to share files or folders with other users.
 - Implement secure sharing mechanisms with options for setting permissions and expiration dates.
 
@@ -38,7 +40,6 @@ If you are looking to get started on keycloak yourself, I folowed a great tutori
 
 ## Search:
 - Develop search functionality to allow users to search for files based on metadata or content.
-
 
 ## Video Streaming:
 - Integrate video streaming capabilities to allow users to stream video files stored on the server.
@@ -65,7 +66,3 @@ If you are looking to get started on keycloak yourself, I folowed a great tutori
 ## Backup and Disaster Recovery:
 - Set up regular backups of data stored on the server.
 - Develop a disaster recovery plan and implement mechanisms for data restoration in case of failures.
-
-## Compliance and Regulation:
-- Ensure compliance with relevant regulations and standards such as GDPR, HIPAA, or PCI DSS.
-- Implement features for data retention policies and compliance reporting.
