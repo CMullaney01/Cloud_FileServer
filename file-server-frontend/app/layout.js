@@ -7,7 +7,7 @@ import SessionProviderWrapper from '@/app/utils/sessionProviderWrapper'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'My demo',
+  title: 'My Auth service',
   description: 'Some description for my website',
 }
 
@@ -19,7 +19,7 @@ export default function RootLayout({ children }) {
         <div className="flex flex-row">
           <div className="w-4/5 p-3 h-screen bg-black">{children}</div>
           <div className="w-1/5 p-3 h-screen bg-gray-700">
-            <h2 className="text-3xl">Demo - frontend</h2>
+            <h2 className="text-3xl">Auth - frontend</h2>
               <AuthStatus />
             <hr />
               <Nav />
