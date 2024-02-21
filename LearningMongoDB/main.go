@@ -5,8 +5,13 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -124,6 +129,40 @@ func (bmc *BackendMongoClient) handleFileDownload(w http.ResponseWriter, r *http
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(fileData)
+}
+
+func GeneratePresignedURL(bucketName, objectKey string, expiration time.Duration) (string, error) {
+	// Retrieve AWS credentials from environment variables
+	awsAccessKey := os.Getenv("AWS_ACCESS_KEY_ID")
+	awsSecretKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
+	awsRegion := os.Getenv("AWS_REGION")
+
+	// Create AWS credentials
+	creds := credentials.NewStaticCredentials(awsAccessKey, awsSecretKey, "")
+
+	// Create a new AWS session with the provided credentials and region
+	sess, err := session.NewSession(&aws.Config{
+		Region:      aws.String(awsRegion),
+		Credentials: creds,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	// Create a new S3 service client
+	svc := s3.New(sess)
+
+	// Generate the presigned URL
+	req, _ := svc.GetObjectRequest(&s3.GetObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(objectKey),
+	})
+	presignedURL, err := req.Presign(expiration) // Use the expiration directly
+	if err != nil {
+		return "", err
+	}
+
+	return presignedURL, nil
 }
 
 func main() {
