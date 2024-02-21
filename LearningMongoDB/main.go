@@ -78,7 +78,7 @@ func NewMongoClient(c *mongo.Client) *BackendMongoClient {
 // this is a http handler
 func (bmc *BackendMongoClient) handleUserFileList(w http.ResponseWriter, r *http.Request) {
 	// Parse the user ID from the request or get it from the user's session
-	userID := "user123" // Example user ID, replace with actual user ID
+	userID := "user1234" // Example user ID, replace with actual user ID
 
 	// Access the "files" collection in the "user-data" database
 	coll := bmc.client.Database("user-data").Collection("files")
@@ -187,15 +187,22 @@ func (bmc *BackendMongoClient) handleFileDownload(w http.ResponseWriter, r *http
 	// Access the "files" collection in the "user-data" database
 	coll := bmc.client.Database("user-data").Collection("files")
 
-	// Parse the file ID from the request or get it from the request parameters
+	// Parse the file ID from the request parameters
 	fileID := r.URL.Query().Get("fileID")
 	if fileID == "" {
 		http.Error(w, "File ID is required", http.StatusBadRequest)
 		return
 	}
 
+	// Convert the fileID string to primitive.ObjectID
+	oid, err := primitive.ObjectIDFromHex(fileID)
+	if err != nil {
+		http.Error(w, "Invalid File ID format", http.StatusBadRequest)
+		return
+	}
+
 	// Define a filter to find the file by its ID
-	filter := bson.M{"_id": fileID}
+	filter := bson.M{"_id": oid}
 
 	// Find the file in the collection
 	var fileData File
@@ -204,10 +211,26 @@ func (bmc *BackendMongoClient) handleFileDownload(w http.ResponseWriter, r *http
 		return
 	}
 
-	// Respond with the file data
+	// Generate presigned URL for the requested file
+	presignedURL, err := GeneratePresignedURL(fileData.S3Bucket, fileData.S3ObjectKey, 20*time.Second) // Adjust expiration time as needed
+	if err != nil {
+		http.Error(w, "Failed to generate presigned URL", http.StatusInternalServerError)
+		return
+	}
+
+	// Include presigned URL in the response
+	response := struct {
+		File         File   `json:"file"`
+		PresignedURL string `json:"presignedURL"`
+	}{
+		File:         fileData,
+		PresignedURL: presignedURL,
+	}
+
+	// Respond with the file information and the presigned URL
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(fileData)
+	json.NewEncoder(w).Encode(response)
 }
 
 func main() {
