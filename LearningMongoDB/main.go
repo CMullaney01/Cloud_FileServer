@@ -1,4 +1,4 @@
-package example
+package main
 
 import (
 	"context"
@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -26,6 +27,40 @@ type File struct {
 	S3ObjectKey string             `bson:"s3ObjectKey"`
 	CreatedAt   time.Time          `bson:"createdAt"`
 	IsPublic    bool               `bson:"isPublic"`
+}
+
+func GeneratePresignedURL(bucketName, objectKey string, expiration time.Duration) (string, error) {
+	// Retrieve AWS credentials from environment variables
+	awsAccessKey := os.Getenv("AWS_ACCESS_KEY_ID")
+	awsSecretKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
+	awsRegion := os.Getenv("AWS_REGION")
+
+	// Create AWS credentials
+	creds := credentials.NewStaticCredentials(awsAccessKey, awsSecretKey, "")
+
+	// Create a new AWS session with the provided credentials and region
+	sess, err := session.NewSession(&aws.Config{
+		Region:      aws.String(awsRegion),
+		Credentials: creds,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	// Create a new S3 service client
+	svc := s3.New(sess)
+
+	// Generate the presigned URL
+	req, _ := svc.GetObjectRequest(&s3.GetObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(objectKey),
+	})
+	presignedURL, err := req.Presign(expiration) // Use the expiration directly
+	if err != nil {
+		return "", err
+	}
+
+	return presignedURL, nil
 }
 
 // create a type which we can utilise to implement different abilities
@@ -79,29 +114,73 @@ func (bmc *BackendMongoClient) handleUserFileList(w http.ResponseWriter, r *http
 		log.Fatal(err)
 	}
 }
-
 func (bmc *BackendMongoClient) handleFileUpload(w http.ResponseWriter, r *http.Request) {
 	// Access the "files" collection in the "user-data" database
 	coll := bmc.client.Database("user-data").Collection("files")
 
 	// Decode the file data from the request body
-	var fileData File
+	var fileData struct {
+		FileName string `json:"fileName"`
+		UserID   string `json:"userId"`
+	}
 	if err := json.NewDecoder(r.Body).Decode(&fileData); err != nil {
 		http.Error(w, "Failed to decode file data", http.StatusBadRequest)
 		return
 	}
 
+	// Generate other necessary fields
+	fileID := primitive.NewObjectID()
+	createdAt := time.Now()
+	isPublic := false // You can set this as required
+
+	// Construct S3 object key with userID and filename
+	objectKey := fileData.UserID + "/" + fileData.FileName
+
+	// Get the S3 bucket name from environment variable
+	s3Bucket := os.Getenv("AWS_S3_BUCKET")
+	if s3Bucket == "" {
+		http.Error(w, "AWS_S3_BUCKET environment variable is not set", http.StatusInternalServerError)
+		return
+	}
+
+	// Create the File object
+	newFile := File{
+		ID:          fileID,
+		UserID:      fileData.UserID,
+		FileName:    fileData.FileName,
+		S3Bucket:    s3Bucket,
+		S3ObjectKey: objectKey,
+		CreatedAt:   createdAt,
+		IsPublic:    isPublic,
+	}
+
 	// Insert the file data into the collection
-	_, err := coll.InsertOne(context.TODO(), fileData)
+	_, err := coll.InsertOne(context.TODO(), newFile)
 	if err != nil {
 		http.Error(w, "Failed to insert file into database", http.StatusInternalServerError)
 		return
 	}
 
-	// Respond with success
+	// Generate presigned URL for the uploaded file
+	presignedURL, err := GeneratePresignedURL(s3Bucket, objectKey, 20*time.Second) // Adjust expiration time as needed
+	if err != nil {
+		http.Error(w, "Failed to generate presigned URL", http.StatusInternalServerError)
+		return
+	}
+
+	// Include presigned URL in the response
+	response := struct {
+		File         File   `json:"file"`
+		PresignedURL string `json:"presignedURL"`
+	}{
+		File:         newFile,
+		PresignedURL: presignedURL,
+	}
+
+	// Respond with success and the presigned URL
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(fileData)
+	json.NewEncoder(w).Encode(response)
 }
 
 func (bmc *BackendMongoClient) handleFileDownload(w http.ResponseWriter, r *http.Request) {
@@ -131,41 +210,11 @@ func (bmc *BackendMongoClient) handleFileDownload(w http.ResponseWriter, r *http
 	json.NewEncoder(w).Encode(fileData)
 }
 
-func GeneratePresignedURL(bucketName, objectKey string, expiration time.Duration) (string, error) {
-	// Retrieve AWS credentials from environment variables
-	awsAccessKey := os.Getenv("AWS_ACCESS_KEY_ID")
-	awsSecretKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
-	awsRegion := os.Getenv("AWS_REGION")
-
-	// Create AWS credentials
-	creds := credentials.NewStaticCredentials(awsAccessKey, awsSecretKey, "")
-
-	// Create a new AWS session with the provided credentials and region
-	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String(awsRegion),
-		Credentials: creds,
-	})
-	if err != nil {
-		return "", err
-	}
-
-	// Create a new S3 service client
-	svc := s3.New(sess)
-
-	// Generate the presigned URL
-	req, _ := svc.GetObjectRequest(&s3.GetObjectInput{
-		Bucket: aws.String(bucketName),
-		Key:    aws.String(objectKey),
-	})
-	presignedURL, err := req.Presign(expiration) // Use the expiration directly
-	if err != nil {
-		return "", err
-	}
-
-	return presignedURL, nil
-}
-
 func main() {
+	err := godotenv.Load(".env.local")
+	if err != nil {
+		panic("Error loading .env.local file")
+	}
 	// Connect to the MongoDB server
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI("mongodb://localhost:27017"))
 	if err != nil {
