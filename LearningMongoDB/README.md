@@ -13,3 +13,8 @@
 [Tutorial 2: Amazon S3 Absolute Basics](https://www.youtube.com/watch?v=FLIp6BLtwjk)
 
 - note not in video: I am generating an IAM user with a access key and secret key. This is to allow my backend to sign urls to provide my frontend access to files. However a cool solution in the future if this ever becomes production would be to use IAM roles which creates temporary access and this can be used if my backend is run on a EC2 instance.
+
+# Usage
+- If you would like to test the backend returning required URLS you will need to create your own s3 instance and set the environment variables
+- after this, you need to run the docker-compose in the docker compose file to create the mongodb database. There is a .bat file ready for you
+- after this you are free to run ```go run .``` and you can make the appropriate requests in the thunderclient

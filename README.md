@@ -29,11 +29,11 @@ If you are looking to get started on keycloak yourself, I folowed a great tutori
 ![Example Image](research/images/file-storage.png)
 
 ### To do for this milestone:
-- We have a mongodb setup our backend needs to be able to access the db read and write: to maintain security the backend api needs to be authenticated 
-much like how keycloak authenticates. To do this we enable auth and create a user with appropriate privilidges, allowing us to login.
-- Once we are able to store metadata here, download, upload etc (no actual files move) we move onto implementing s3. We have chosen to go with generating urls each time 
+- ✅ We have a mongodb setup our backend needs to be able to access the db read and write
+- ✅ Once we are able to store metadata here, download, upload etc (no actual files move) we move onto implementing s3. We have chosen to go with generating urls each time 
 as such for each file the "s3bucket" and "s3ObjectKey" need to be stored in the mongodb, on file creation, allowing us to generate urls which can be passed back to the client.
 I suggest that these urls be time limited.
+- Its all integrated in the example in "LearningMongoDB", we need to migrate these to our API and we will have a working backend! 
 - The client will need a lot of work at this point to handle everything, access the s3 instance and display things well
 
 # The rest of these milestones are considered extensions to the project 
