@@ -5,6 +5,7 @@ import (
 	"backend/api/middlewares"
 	"backend/infrastructure/datastores"
 	"backend/infrastructure/identity"
+	"backend/infrastructure/mongomgmt"
 	"backend/use_cases/filemgmtuc"
 	"backend/use_cases/productsuc"
 	"backend/use_cases/usermgmtuc"
@@ -40,9 +41,8 @@ func InitProtectedRoutes(app *fiber.App) {
 	grp.Get("/products", middlewares.NewRequiresRealmRole("viewer"),
 		handlers.GetProductsHandler(getProductsUseCase))
 
-	filesDataStore := datastores.NewFilesDataStore()
-
+	fileManager := mongomgmt.NewFileManager()
 	// auths for if we didnt need role-based auth
-	uploadFileUseCase := filemgmtuc.NewFileUploadUseCase(filesDataStore)
+	uploadFileUseCase := filemgmtuc.NewFileUploadUseCase(fileManager)
 	grp.Post("/files", handlers.UploadFileHandler(uploadFileUseCase))
 }

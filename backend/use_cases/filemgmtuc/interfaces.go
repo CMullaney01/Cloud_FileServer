@@ -2,10 +2,11 @@ package filemgmtuc
 
 import (
 	"backend/domain/entities"
+	"context"
 )
 
-type FileUploadDownload interface {
+type fileManager interface {
 	// List() []entities.File
 	// Download() entities.File
-	Upload(file *entities.File) error
+	Upload(ctx context.Context, file *entities.File) (string, error)
 }

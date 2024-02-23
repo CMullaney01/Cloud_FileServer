@@ -30,16 +30,20 @@ func main() {
 }
 
 func initViper() {
-	viper.SetConfigName("config")
-	viper.SetConfigType("json")
+	// Use .env.local file
+	viper.SetConfigName(".env.local")
 	viper.AddConfigPath(".")
+	viper.SetConfigType("env")
+
+	// Look for environment variables prefixed with "Auth"
 	viper.SetEnvPrefix("Auth")
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
-	err := viper.ReadInConfig()
-	if err != nil {
-		panic(fmt.Errorf("unable to initialize viper: %w", err))
+	// Try reading from .env.local
+	if err := viper.ReadInConfig(); err != nil {
+		log.Printf("Unable to read config file: %s", err)
+	} else {
+		log.Println("Config file loaded successfully")
 	}
-	log.Println("viper config initialized")
 }

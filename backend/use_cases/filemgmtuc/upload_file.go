@@ -3,28 +3,32 @@ package filemgmtuc
 import (
 	"backend/domain/entities"
 	"context"
+	"os"
 	"time"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type UploadFileRequest struct {
-	Name string `validate:"required,min=3,max=15"`
-	Path string `validate:"required"`
+	FileName    string `validate:"required"`
+	UserID      string `validate:"required"`
+	ContentType string `validate:"required"`
+	Size        int64  `validate:"required"`
 }
 
 type UploadFileResponse struct {
-	File *entities.File
+	File         *entities.File `json:"file"`
+	PresignedURL string         `json:"presignedURL"`
 }
 
 type uploadFileUseCase struct {
-	fileStore FileUploadDownload
+	fileManager fileManager
 }
 
-func NewFileUploadUseCase(fs FileUploadDownload) *uploadFileUseCase {
+func NewFileUploadUseCase(fm fileManager) *uploadFileUseCase {
 	return &uploadFileUseCase{
-		fileStore: fs,
+		fileManager: fm,
 	}
 }
 
@@ -36,20 +40,35 @@ func (uc *uploadFileUseCase) UploadFile(ctx context.Context, request UploadFileR
 		return nil, err
 	}
 
+	fileID := primitive.NewObjectID()
+	createdAt := time.Now()
+	isPublic := false // You can set this as required
+
+	// Construct S3 object key with userID and filename
+	objectKey := request.UserID + "/" + request.FileName
+
+	s3Bucket := os.Getenv("AWS_S3_BUCKET")
+
 	var file = &entities.File{
-		Id:          uuid.New(),
-		CreatedAt:   time.Now(),
-		Name:        request.Name,
-		ContentType: "pdf",
-		Size:        0,
-		Path:        request.Path,
+		ID:          fileID,
+		UserID:      request.UserID,
+		FileName:    request.FileName,
+		S3Bucket:    s3Bucket,
+		S3ObjectKey: objectKey,
+		CreatedAt:   createdAt,
+		IsPublic:    isPublic,
+		Size:        request.Size,
+		ContentType: request.ContentType,
 	}
 
-	err = uc.fileStore.Upload(file)
+	presignedURL, err := uc.fileManager.Upload(ctx, file)
 	if err != nil {
 		return nil, err
 	}
 
-	var response = &UploadFileResponse{File: file}
+	var response = &UploadFileResponse{
+		File:         file,
+		PresignedURL: presignedURL,
+	}
 	return response, nil
 }
