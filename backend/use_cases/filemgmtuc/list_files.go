@@ -8,6 +8,7 @@ type getFilesUseCase struct {
 	fileManager fileManager
 }
 
+// /test commit
 func NewGetFilesUseCase(fm fileManager) *getFilesUseCase {
 	return &getFilesUseCase{
 		fileManager: fm,
