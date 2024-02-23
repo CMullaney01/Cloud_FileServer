@@ -6,7 +6,7 @@ import (
 )
 
 type fileManager interface {
-	// List() []entities.File
-	// Download() entities.File
+	List(ctx context.Context, userID string) (map[string]string, error)
 	Upload(ctx context.Context, file *entities.File) (string, error)
+	Download(ctx context.Context, userID string, filename string) (string, error)
 }
