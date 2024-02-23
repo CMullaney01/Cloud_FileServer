@@ -2,7 +2,6 @@ package mongomgmt
 
 import (
 	"context"
-	"os"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -23,7 +22,7 @@ type FileManager struct {
 
 func NewFileManager() *FileManager {
 	return &FileManager{
-		monogURI: viper.GetString("Mongo.URI"),
+		monogURI: viper.GetString("Mongo_URI"),
 	}
 }
 
@@ -37,9 +36,9 @@ func (m *FileManager) connectToMongoDB() (*mongo.Client, error) {
 
 func (m *FileManager) GeneratePresignedURL(bucketName, objectKey string, expiration time.Duration) (string, error) {
 	// Retrieve AWS credentials from environment variables
-	awsAccessKey := os.Getenv("AWS_ACCESS_KEY_ID")
-	awsSecretKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
-	awsRegion := os.Getenv("AWS_REGION")
+	awsAccessKey := viper.GetString("AWS_ACCESS_KEY_ID")
+	awsSecretKey := viper.GetString("AWS_SECRET_ACCESS_KEY")
+	awsRegion := viper.GetString("AWS_REGION")
 
 	// Create AWS credentials
 	creds := credentials.NewStaticCredentials(awsAccessKey, awsSecretKey, "")

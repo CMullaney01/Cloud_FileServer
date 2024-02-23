@@ -21,10 +21,10 @@ type identityManager struct {
 
 func NewIdentityManager() *identityManager {
 	return &identityManager{
-		baseUrl:             viper.GetString("KeyCloak.BaseUrl"),
-		realm:               viper.GetString("KeyCloak.Realm"),
-		restApiClientId:     viper.GetString("KeyCloak.RestApi.ClientId"),
-		restApiClientSecret: viper.GetString("KeyCloak.RestApi.ClientSecret"),
+		baseUrl:             viper.GetString("KeyCloak_BaseUrl"),
+		realm:               viper.GetString("KeyCloak_Realm"),
+		restApiClientId:     viper.GetString("KeyCloak_RestApi_ClientId"),
+		restApiClientSecret: viper.GetString("KeyCloak_RestApi_ClientSecret"),
 	}
 }
 

@@ -22,7 +22,7 @@ type TokenRetrospector interface {
 
 func NewJwtMiddleware(tokenRetrospector TokenRetrospector) fiber.Handler {
 
-	base64Str := viper.GetString("KeyCloak.RealmRS256PublicKey")
+	base64Str := viper.GetString("KeyCloak_RealmRS256PublicKey")
 	publicKey, err := parseKeycloakRSAPublicKey(base64Str)
 	if err != nil {
 		panic(err)

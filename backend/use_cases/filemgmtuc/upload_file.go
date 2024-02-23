@@ -3,10 +3,10 @@ package filemgmtuc
 import (
 	"backend/domain/entities"
 	"context"
-	"os"
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -47,7 +47,7 @@ func (uc *uploadFileUseCase) UploadFile(ctx context.Context, request UploadFileR
 	// Construct S3 object key with userID and filename
 	objectKey := request.UserID + "/" + request.FileName
 
-	s3Bucket := os.Getenv("AWS_S3_BUCKET")
+	s3Bucket := viper.GetString("AWS_S3_BUCKET")
 
 	var file = &entities.File{
 		ID:          fileID,
