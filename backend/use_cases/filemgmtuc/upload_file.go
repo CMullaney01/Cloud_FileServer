@@ -12,7 +12,6 @@ import (
 
 type UploadFileRequest struct {
 	FileName    string `validate:"required"`
-	UserID      string `validate:"required"`
 	ContentType string `validate:"required"`
 	Size        int64  `validate:"required"`
 }
@@ -32,7 +31,7 @@ func NewFileUploadUseCase(fm fileManager) *uploadFileUseCase {
 	}
 }
 
-func (uc *uploadFileUseCase) UploadFile(ctx context.Context, request UploadFileRequest) (*UploadFileResponse, error) {
+func (uc *uploadFileUseCase) UploadFile(ctx context.Context, userId string, request UploadFileRequest) (*UploadFileResponse, error) {
 
 	var validate = validator.New()
 	err := validate.Struct(request)
@@ -45,13 +44,13 @@ func (uc *uploadFileUseCase) UploadFile(ctx context.Context, request UploadFileR
 	isPublic := false // You can set this as required
 
 	// Construct S3 object key with userID and filename
-	objectKey := request.UserID + "/" + request.FileName
+	objectKey := userId + "/" + request.FileName
 
 	s3Bucket := viper.GetString("AWS_S3_BUCKET")
 
 	var file = &entities.File{
 		ID:          fileID,
-		UserID:      request.UserID,
+		UserID:      userId,
 		FileName:    request.FileName,
 		S3Bucket:    s3Bucket,
 		S3ObjectKey: objectKey,

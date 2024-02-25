@@ -26,10 +26,6 @@ func InitPublicRoutes(app *fiber.App) {
 
 	grp.Post("/user", handlers.RegisterHandler(registerUseCase))
 
-	fileManager := mongomgmt.NewFileManager()
-	// auths for if we didnt need role-based auth
-	uploadFileUseCase := filemgmtuc.NewFileUploadUseCase(fileManager)
-	grp.Post("/files", handlers.UploadFileHandler(uploadFileUseCase))
 }
 
 func InitProtectedRoutes(app *fiber.App) {
@@ -46,4 +42,12 @@ func InitProtectedRoutes(app *fiber.App) {
 	grp.Get("/products", middlewares.NewRequiresRealmRole("viewer"),
 		handlers.GetProductsHandler(getProductsUseCase))
 
+	fileManager := mongomgmt.NewFileManager()
+	// auths for if we didnt need role-based auth
+	uploadFileUseCase := filemgmtuc.NewFileUploadUseCase(fileManager)
+	grp.Post("/files", handlers.UploadFileHandler(uploadFileUseCase))
+
+	// auths for if we didnt need role-based auth
+	downloadFileUseCase := filemgmtuc.NewDownloadFileUseCase(fileManager)
+	grp.Get("/files", handlers.DownloadFileHandler(downloadFileUseCase))
 }
