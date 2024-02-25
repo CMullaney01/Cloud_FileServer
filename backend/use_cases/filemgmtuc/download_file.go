@@ -14,9 +14,9 @@ func NewDownloadFileUseCase(fm fileManager) *downloadFileUseCase {
 	}
 }
 
-func (uc *downloadFileUseCase) DownloadFile(ctx context.Context, userId string, filename string) (string, error) {
+func (uc *downloadFileUseCase) DownloadFile(ctx context.Context, userId string, fileId string) (string, error) {
 
-	files, err := uc.fileManager.Download(ctx, filename, userId)
+	files, err := uc.fileManager.Download(ctx, fileId, userId)
 	if err != nil {
 		return "", err
 	}
