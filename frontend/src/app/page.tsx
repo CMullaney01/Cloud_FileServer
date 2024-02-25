@@ -3,7 +3,6 @@ import Navbar from './components/Navbar/Navbar';
 import ArchitectureCard from './components/ArchitectureCard/ArchitectureCard'
 import DashCard from './components/DashCard/DashCard'
 import TutorialCard from './components/TutorialCard/TutorialCard'
-import Footer from './components/Footer/Footer'
 export default function Home() {
   return (
     <main>
@@ -14,7 +13,6 @@ export default function Home() {
         <DashCard />
         <TutorialCard  />
       </div>
-      <Footer />
     </main>
   );
 }
