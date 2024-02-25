@@ -1,17 +1,20 @@
 import React from 'react';
 import Navbar from './components/Navbar/Navbar';
-import architectureImage from '../../public/file-storage.png'; // Import your PNG file
-import Image from 'next/image';
-
+import ArchitectureCard from './components/ArchitectureCard/ArchitectureCard'
+import DashCard from './components/DashCard/DashCard'
+import TutorialCard from './components/TutorialCard/TutorialCard'
+import Footer from './components/Footer/Footer'
 export default function Home() {
   return (
-    <main data-theme="dim">
+    <main>
       <Navbar />
-      <div className="page-content">
-        {/* Your page content goes here */}
-        <Image src={architectureImage} alt="Your Image" /> {/* Use the imported image */}
-        <button className="btn btn-ghost">Ghost</button>
+      <div className="page-content mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Architecture Cards */}
+        <ArchitectureCard />
+        <DashCard />
+        <TutorialCard  />
       </div>
+      <Footer />
     </main>
   );
 }

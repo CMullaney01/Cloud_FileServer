@@ -2,3 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+.hover-scale {
+    transition: transform 0.2s ease-in-out; /* Add transition effect */
+}
+  
+.hover-scale:hover {
+transform: scale(1.04); /* Scale up to 110% on hover */
+}
