@@ -13,13 +13,13 @@ const Navbar = () => {
           </ul>
         </div>
         <Link className="btn btn-ghost text-xl" href="/">
-          Conor Mullaney's File Server
+          Conor Mullaney&apos;s File Server
         </Link>
       </div>
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal px-1 text-xl">
           <li style={{ marginRight: '20px' }}>
-            <Link href="/about">
+            <Link href="https://github.com/CMullaney01/Cloud_FileServer">
             About
             </Link>
           </li>
