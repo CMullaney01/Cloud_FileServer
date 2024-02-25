@@ -43,11 +43,13 @@ func InitProtectedRoutes(app *fiber.App) {
 		handlers.GetProductsHandler(getProductsUseCase))
 
 	fileManager := mongomgmt.NewFileManager()
-	// auths for if we didnt need role-based auth
+
 	uploadFileUseCase := filemgmtuc.NewFileUploadUseCase(fileManager)
 	grp.Post("/files", handlers.UploadFileHandler(uploadFileUseCase))
 
-	// auths for if we didnt need role-based auth
 	downloadFileUseCase := filemgmtuc.NewDownloadFileUseCase(fileManager)
 	grp.Get("/files", handlers.DownloadFileHandler(downloadFileUseCase))
+
+	getFilesUseCase := filemgmtuc.NewGetFilesUseCase(fileManager)
+	grp.Get("/filelist", handlers.GetFilesHandler(getFilesUseCase))
 }

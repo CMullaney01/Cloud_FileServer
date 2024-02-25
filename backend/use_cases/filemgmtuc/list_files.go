@@ -1,6 +1,7 @@
 package filemgmtuc
 
 import (
+	"backend/domain/entities"
 	"context"
 )
 
@@ -15,7 +16,7 @@ func NewGetFilesUseCase(fm fileManager) *getFilesUseCase {
 	}
 }
 
-func (uc *getFilesUseCase) GetFiles(ctx context.Context, userId string) (map[string]string, error) {
+func (uc *getFilesUseCase) GetFiles(ctx context.Context, userId string) ([]entities.File, error) {
 
 	files, err := uc.fileManager.List(ctx, userId)
 	if err != nil {

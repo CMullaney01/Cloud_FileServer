@@ -3,6 +3,7 @@ package mongomgmt
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -28,8 +29,8 @@ func NewFileManager() *FileManager {
 	}
 }
 
-func (m *FileManager) connectToMongoDB() (*mongo.Client, error) {
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(m.monogURI))
+func (m *FileManager) connectToMongoDB(ctx context.Context) (*mongo.Client, error) {
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(m.monogURI))
 	if err != nil {
 		return nil, errors.Wrap(err, "could not connect to mongodb")
 	}
@@ -72,17 +73,21 @@ func (m *FileManager) GeneratePresignedURL(bucketName, objectKey string, method 
 }
 
 func (m *FileManager) Upload(ctx context.Context, file *entities.File) (string, error) {
-	client, err := m.connectToMongoDB()
+	client, err := m.connectToMongoDB(ctx)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to connect to MongoDB")
 	}
+	defer client.Disconnect(ctx)
 
 	coll := client.Database("user-data").Collection("files")
 
-	// Use the provided context
-	_, err = coll.InsertOne(ctx, file)
+	filter := bson.M{"S3ObjectKey": file.S3ObjectKey}
+
+	// Perform the replacement operation
+	// stops there being multiple of the same file
+	_, err = coll.ReplaceOne(ctx, filter, file, options.Replace().SetUpsert(true))
 	if err != nil {
-		return "", errors.Wrap(err, "failed to insert file into database")
+		return "", errors.Wrap(err, "failed to insert or update file")
 	}
 
 	// Generate presigned URL for the uploaded file
@@ -95,11 +100,12 @@ func (m *FileManager) Upload(ctx context.Context, file *entities.File) (string, 
 	return presignedURL, nil
 }
 
-func (m *FileManager) List(ctx context.Context, userID string) (map[string]string, error) {
-	client, err := m.connectToMongoDB()
+func (m *FileManager) List(ctx context.Context, userID string) ([]entities.File, error) {
+	client, err := m.connectToMongoDB(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to connect to MongoDB")
 	}
+	defer client.Disconnect(ctx)
 
 	coll := client.Database("user-data").Collection("files")
 
@@ -111,47 +117,36 @@ func (m *FileManager) List(ctx context.Context, userID string) (map[string]strin
 		},
 	}
 
-	// Find files based on the filter
+	// Query files for the specific user or labeled as public
 	cursor, err := coll.Find(ctx, filter)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to list files")
-	}
-	defer cursor.Close(ctx)
-
-	// Map to store file name and corresponding signed URLs
-	fileURLs := make(map[string]string)
-
-	// Iterate over the cursor and generate signed URLs
-	for cursor.Next(ctx) {
-		var file entities.File
-		if err := cursor.Decode(&file); err != nil {
-			return nil, errors.Wrap(err, "failed to decode file")
-		}
-		presignedURL, err := m.GeneratePresignedURL(file.S3Bucket, file.S3ObjectKey, "GET", 20*time.Second)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to generate presigned URL")
-		}
-		fileURLs[file.FileName] = presignedURL
+		log.Fatal(err)
 	}
 
-	if err := cursor.Err(); err != nil {
-		return nil, errors.Wrap(err, "cursor error")
+	defer cursor.Close(ctx) // Close cursor when function exits
+
+	// Define a slice to store files for the specific user or labeled as public
+	var userFiles []entities.File
+	if err := cursor.All(ctx, &userFiles); err != nil {
+		return nil, errors.Wrap(err, "failed to decode files")
 	}
 
-	return fileURLs, nil
+	return userFiles, nil
 }
 
 func (m *FileManager) Download(ctx context.Context, fileName string, userId string) (string, error) {
-	client, err := m.connectToMongoDB()
+	client, err := m.connectToMongoDB(ctx)
 	if err != nil {
 		return "", err
 	}
+	defer client.Disconnect(ctx)
 
 	coll := client.Database("user-data").Collection("files")
 
 	// Define filter to find the file based on the file name and user ID
-	filter := bson.M{"userId": userId, "name": fileName}
+	filter := bson.M{"userId": userId, "fileName": fileName}
 
+	fmt.Println("We made it here")
 	// Find the file based on the filter
 	var file entities.File
 	if err := coll.FindOne(ctx, filter).Decode(&file); err != nil {

@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 
+	"backend/domain/entities"
 	"backend/shared/enums"
 	"backend/use_cases/filemgmtuc"
 
@@ -20,7 +21,7 @@ type DownloadFileUseCase interface {
 }
 
 type GetFilesUseCase interface {
-	GetFiles(ctx context.Context, userId string) (map[string]string, error)
+	GetFiles(ctx context.Context, userId string) ([]entities.File, error)
 }
 
 func UploadFileHandler(useCase UploadFileUseCase) fiber.Handler {
