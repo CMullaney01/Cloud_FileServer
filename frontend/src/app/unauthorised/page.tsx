@@ -4,4 +4,4 @@ export default function Unauthorized() {
         <h1 className="text-4xl text-center">Unauthorized 😕</h1>
       </main>
     );
-  }
+}

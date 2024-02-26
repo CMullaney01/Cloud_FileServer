@@ -1,12 +1,12 @@
 import React from 'react'
-import architectureImage from '../../../../public/Cloudify.png';
+import dashImage from '../../../../public/Dashboard.png';
 import Image from 'next/image';
 
 
 const DashCard = () => {
   return (
     <div className="card w-50 bg-base-100 shadow-xl hover-scale">
-      <figure> <Image  className='bg-primary'style={{ borderRadius: '2.5rem'}}src={architectureImage} alt="Your Image" /></figure>
+      <figure> <Image  className='bg-primary'style={{ borderRadius: '2.5rem'}}src={dashImage} alt="Your Image" /></figure>
       <div className="card-body">
           <h2 className="card-title">
           Your File Dashboard

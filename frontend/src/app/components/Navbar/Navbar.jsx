@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import AuthStatus from '@/app/components/AuthStatus/AuthStatus'
 
 const Navbar = () => {
   return (
@@ -9,7 +10,7 @@ const Navbar = () => {
             <div tabIndex={0} role="button" className="btn btn-ghost">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /></svg>
             </div>
-            <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+            <ul tabIndex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
               <li><Link Link href="/Dashboard" >Dashboard</Link></li>
               <li>
                 <a>About</a>
@@ -25,9 +26,7 @@ const Navbar = () => {
           </Link>
         </div>
         <div className="navbar-end">
-          <Link className="btn" href="/login">
-            Login/Sign-up
-          </Link>
+          <AuthStatus />
         </div>
       </div>
   );

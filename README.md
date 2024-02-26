@@ -1,6 +1,8 @@
 # Cloud_FileServer
 Extending the File Server project written in Go to make more use of the cloud. Please read the roadmap below, for more information on the design choices please look at the research folder.
 
+[![Update](https://img.youtube.com/vi/dBqw9DRGSNY0.jpg)](https://www.youtube.com/watch?v=dBqw9DRGSNY)
+
 ### Current Set-up
 ![Example Image](research/images/file-storage.png)
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useSession, signIn, signOut } from "next-auth/react";
+import Link from "next/link";
 import { useEffect } from "react";
 
 async function keycloakSessionLogOut() {
@@ -31,28 +32,26 @@ export default function AuthStatus() {
   } else if (session) {
     return (
       <div className="my-3">
-        Logged in as <span className="text-yellow-100">{session.user.email}</span>{" "}
-        <button
-          className="bg-blue-900 font-bold text-white py-1 px-2 rounded border border-gray-50"
+        Hello <span>{session.user.name}!</span>{" "}
+        <div
+          className="btn"
           onClick={() => {
+            // end keycloak
             keycloakSessionLogOut().then(() => signOut({ callbackUrl: "/" }));
           }}>
           Log out
-        </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="my-3">
-      Not logged in.{" "}
-      <button
-        className="bg-blue-900 font-bold text-white py-1 px-2 rounded border border-gray-50"
-        onClick={() => {
-            signIn("keycloak")
-          }}>
-        Log in
-      </button>
+    <div>
+      <div className="btn mr-2"  onClick={() => {
+        signIn("keycloak")
+      }}>
+        Login/Sign-up
+      </div>
     </div>
   );
 }

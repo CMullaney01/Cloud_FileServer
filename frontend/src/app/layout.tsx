@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import './styles/globals.css';
 import Footer from './components/Footer/Footer'
+import SessionProviderWrapper from '@/app/utils/SessionProviderWrapper'
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,13 +17,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="dim">
-      <body className={inter.className}>
-          <div className="p-4 flex-grow">
-            {children}
-          </div>
-          <Footer />
-      </body>
-    </html>
+    <SessionProviderWrapper>
+      <html lang="en" data-theme="dim">
+        <body className={inter.className}>
+            <div className="p-4 flex-grow">
+              {children}
+            </div>
+        <Footer />
+        </body>
+      </html>
+    </SessionProviderWrapper>
   );
 }

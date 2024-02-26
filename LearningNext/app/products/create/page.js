@@ -32,7 +32,7 @@ export default function CreateProduct() {
     );
   }
 
-  if (session && session.roles?.includes("admin")) {
+  if (session) {
     const handleSubmit = async (event) => {
       event.preventDefault();
 
