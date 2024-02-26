@@ -1,6 +1,7 @@
 "use client";
 
 import { useSession, signIn, signOut } from "next-auth/react";
+import Link from "next/link";
 import { useEffect } from "react";
 
 async function keycloakSessionLogOut() {
@@ -45,10 +46,12 @@ export default function AuthStatus() {
   }
 
   return (
-    <div className="btn"  onClick={() => {
-      signIn("keycloak")
-    }}>
-      Login/Sign-up
+    <div>
+      <div className="btn mr-2"  onClick={() => {
+        signIn("keycloak")
+      }}>
+        Login/Sign-up
+      </div>
     </div>
   );
 }
