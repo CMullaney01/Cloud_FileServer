@@ -23,8 +23,8 @@ export default function RootLayout({
             <div className="p-4 flex-grow">
               {children}
             </div>
-        </body>
         <Footer />
+        </body>
       </html>
     </SessionProviderWrapper>
   );

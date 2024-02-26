@@ -10,7 +10,7 @@ export default function Home() {
   return (
     <main>
       <Navbar />
-      <div className="page-content mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="page-content mt-6 grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Architecture Cards */}
         <ArchitectureCard />
         <Link href="/dashboard">

@@ -3,20 +3,10 @@ import { authOptions } from "../api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import { getAccessToken } from "@/app/utils/SessionTokenAccesor";
 import { SetDynamicRoute } from "@/app/utils/SetDynamicRoute";
+import UploadFile from '@/app/components/UploadFile/UploadFile'
 import FileTree from "@/app/components/FileTree/FileTree"
 import Navbar from '@/app/components/Navbar/Navbar';
-
-interface File {
-  ID: string;
-  UserID: string;
-  FileName: string;
-  S3Bucket: string;
-  S3ObjectKey: string;
-  CreatedAt: string;
-  IsPublic: boolean;
-  Size: number;
-  ContentType: string;
-}
+import { File } from '@/app/types/types';
 
 async function listFiles(): Promise<File[]> {
   const url = `${process.env.AUTH_BACKEND_URL}/api/v1/filelist`;
@@ -47,6 +37,7 @@ export default async function Dashboard() {
     <main>
       <Navbar />
       <FileTree filenames={files.map(file => file.FileName)} />
+      <UploadFile />
     </main>
     );
   } catch (err) {
@@ -54,10 +45,12 @@ export default async function Dashboard() {
 
       return (
         <main>
+          <Navbar />
           <h1 className="text-4xl text-center">Your Files</h1>
           <p className="text-primary text-center text-lg">
             You Don&apos;t Have any files yet!
           </p>
+          <UploadFile />
         </main>
       );
     }
