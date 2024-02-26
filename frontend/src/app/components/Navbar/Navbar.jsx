@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import AuthStatus from '@/app/components/AuthStatus/AuthStatus'
 
 const Navbar = () => {
   return (
@@ -25,9 +26,7 @@ const Navbar = () => {
           </Link>
         </div>
         <div className="navbar-end">
-          <Link className="btn" href="/login">
-            Login/Sign-up
-          </Link>
+          <AuthStatus />
         </div>
       </div>
   );

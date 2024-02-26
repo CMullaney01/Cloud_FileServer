@@ -1,15 +1,15 @@
 import React from 'react'
-import architectureImage from '../../../../public/Cloudify.png';
+import tutorialImage from '../../../../public/Tutorial.png';
 import Image from 'next/image';
 
 
 const TutorialCard = () => {
   return (
     <div className="card w-50 bg-base-100 shadow-xl hover-scale">
-    <figure> <Image  className='bg-primary'style={{ borderRadius: '2.5rem'}}src={architectureImage} alt="Your Image" /></figure>
+    <figure> <Image  className='bg-primary'style={{ borderRadius: '2.5rem'}}src={tutorialImage} alt="Your Image" /></figure>
     <div className="card-body">
         <h2 className="card-title">
-        Documentation
+        Tutorial
         <div className="badge badge-secondary">updated</div>
           </h2>
           <p><strong>Want to know how to bild the project from scratch? Enjoy this step by step tutorial</strong></p>
