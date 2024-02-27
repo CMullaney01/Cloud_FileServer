@@ -36,8 +36,8 @@ export default async function Dashboard() {
     return (
     <main>
       <Navbar />
-      <FileTree filenames={files.map(file => file.FileName)} />
       <UploadFile />
+      <FileTree filenames={files.map(file => file.FileName)} />
     </main>
     );
   } catch (err) {
@@ -46,11 +46,11 @@ export default async function Dashboard() {
       return (
         <main>
           <Navbar />
+          <UploadFile />
           <h1 className="text-4xl text-center">Your Files</h1>
           <p className="text-primary text-center text-lg">
             You Don&apos;t Have any files yet!
           </p>
-          <UploadFile />
         </main>
       );
     }

@@ -91,7 +91,7 @@ func (m *FileManager) Upload(ctx context.Context, file *entities.File) (string, 
 	}
 
 	// Generate presigned URL for the uploaded file
-	presignedURL, err := m.GeneratePresignedURL(file.S3Bucket, file.S3ObjectKey, "POST", 20*time.Second) // Adjust expiration time as needed
+	presignedURL, err := m.GeneratePresignedURL(file.S3Bucket, file.S3ObjectKey, "PUT", 20*time.Second) // Adjust expiration time as needed
 	if err != nil {
 		return "", errors.Wrap(err, "failed to generate presigned URL")
 	}
@@ -146,7 +146,6 @@ func (m *FileManager) Download(ctx context.Context, fileName string, userId stri
 	// Define filter to find the file based on the file name and user ID
 	filter := bson.M{"userId": userId, "fileName": fileName}
 
-	fmt.Println("We made it here")
 	// Find the file based on the filter
 	var file entities.File
 	if err := coll.FindOne(ctx, filter).Decode(&file); err != nil {
@@ -155,6 +154,7 @@ func (m *FileManager) Download(ctx context.Context, fileName string, userId stri
 		}
 		return "", err
 	}
+	fmt.Println(err)
 
 	// Assuming you have a function to generate a pre-signed URL for the file
 	preSignedURL, err := m.GeneratePresignedURL(file.S3Bucket, file.S3ObjectKey, "GET", 20*time.Second)

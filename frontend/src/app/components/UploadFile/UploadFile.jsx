@@ -43,6 +43,20 @@ const UploadFile = () => {
       });
 
       if (resp.ok) {
+        const data = await resp.json();
+        const presignedURL = data.data.presignedURL
+        // Upload file to S3 using presigned URL
+        const uploadResp = await fetch(presignedURL, {
+          method: "PUT",
+          body: selectedFile,
+          headers: {
+            "Content-Type": selectedFile.type,
+          },
+        });
+
+        if (!uploadResp.ok) {
+          setErrorMsg("Upload failed: " + uploadResp.statusText);
+        }
         router.push("/dashboard");
         router.refresh();
       } else {
