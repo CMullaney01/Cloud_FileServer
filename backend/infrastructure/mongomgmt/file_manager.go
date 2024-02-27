@@ -154,7 +154,6 @@ func (m *FileManager) Download(ctx context.Context, fileName string, userId stri
 		}
 		return "", err
 	}
-	fmt.Println(err)
 
 	// Assuming you have a function to generate a pre-signed URL for the file
 	preSignedURL, err := m.GeneratePresignedURL(file.S3Bucket, file.S3ObjectKey, "GET", 20*time.Second)
