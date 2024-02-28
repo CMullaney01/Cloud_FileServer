@@ -3,7 +3,7 @@ Extending the File Server project written in Go to make more use of the cloud. P
 
 ### Working Demo, Please Click me!
 
-[![Update](./frontend/public/Tutorial.png)](https://youtu.be/4h3a315oxbU)
+[![Update](./frontend/public/Tutorial.png)](https://youtu.be/Kn3tBEmM54s)
 
 ### 🚀 In Progress - Final Goal
 
