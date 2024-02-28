@@ -3,7 +3,7 @@ Extending the File Server project written in Go to make more use of the cloud. P
 
 ### Working Demo, Please Click me!
 
-[![Update](./frontend/public/Tutorial.png)](https://youtu.be/Kn3tBEmM54s)
+[![Update](./frontend/public/Tutorial.png)](https://youtu.be/4h3a315oxbU)
 
 ### 🚀 In Progress - Final Goal
 
@@ -47,12 +47,12 @@ I suggest that these urls be time limited.
 - Make sure our routes, roles are protected correctly by keycloak.
 - Front End, time to hop back into react and learn how we can interact with our new handler functions and the S3 instance.
 
-## 🚀 In Progress: Video Streaming:
+## ✅ Completed: Video Streaming:
 - rudimentary implementation already achieved by just pointing it to the s3 instance
 - Integrate video streaming capabilities to allow users to stream video files stored on the server.
 - Implement adaptive bitrate streaming for better performance across different network conditions.
 
-## Final Cloud Migration:
+## 🚀 In Progres: Final Cloud Migration:
 - Well done, we are moving to the cloud!
 - Here we will deploy our backend services, (mongoDB, rest API and keycloak) on an EC2 instance.
 - need to configure networking, and allow access to the keycloak system 

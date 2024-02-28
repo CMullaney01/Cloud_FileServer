@@ -1,5 +1,6 @@
 import React from 'react';
 import DownloadFileButton from '@/app/components/DownloadFile/DownloadFile';
+import StreamVideoButton from '@/app/components/StreamFile/StreamFile';
 
 const FileItem = ({ filename }) => (
   <li>
@@ -21,6 +22,7 @@ const FileItem = ({ filename }) => (
       {filename}
     </a>
     <DownloadFileButton fileName={filename} />
+    <StreamVideoButton fileName={filename} />
   </li>
 );
 
