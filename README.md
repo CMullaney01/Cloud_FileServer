@@ -5,8 +5,9 @@ Extending the File Server project written in Go to make more use of the cloud. P
 
 [![Update](./frontend/public/Tutorial.png)](https://youtu.be/Kn3tBEmM54s)
 
-### Current Set-up
-![Example Image](research/images/file-storage.png)
+### 🚀 In Progress - Final Goal
+
+![Example Image](research/images/Cloudify.png)
 
 # Project Roadmap
 
@@ -40,13 +41,13 @@ as such for each file the "s3bucket" and "s3ObjectKey" need to be stored in the 
 I suggest that these urls be time limited.
 - ✅Its all integrated in the example in "LearningMongoDB", we need to migrate these to our API and we will have a working backend! 
 
-## 🚀 In Progress: Some Polish!
+## ✅ Completed: Some Polish!
 
 - We now have a working Rest API and appropriate interactions with the mongoDB, keycloak, and AmazonS3. Now we need to tie this all together!
 - Make sure our routes, roles are protected correctly by keycloak.
 - Front End, time to hop back into react and learn how we can interact with our new handler functions and the S3 instance.
 
-## Video Streaming:
+## 🚀 In Progress: Video Streaming:
 - rudimentary implementation already achieved by just pointing it to the s3 instance
 - Integrate video streaming capabilities to allow users to stream video files stored on the server.
 - Implement adaptive bitrate streaming for better performance across different network conditions.
