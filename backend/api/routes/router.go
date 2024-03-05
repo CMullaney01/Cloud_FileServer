@@ -34,6 +34,9 @@ func InitProtectedRoutes(app *fiber.App) {
 	uploadFileUseCase := filemgmtuc.NewFileUploadUseCase(fileManager)
 	grp.Post("/files", handlers.UploadFileHandler(uploadFileUseCase))
 
+	confirmUploadUseCase := filemgmtuc.NewFileUploadUseCase(fileManager)
+	grp.Post("/files/confirm", handlers.ConfirmUploadHandler(confirmUploadUseCase))
+
 	downloadFileUseCase := filemgmtuc.NewDownloadFileUseCase(fileManager)
 	grp.Get("/files", handlers.DownloadFileHandler(downloadFileUseCase))
 
