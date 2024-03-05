@@ -2,12 +2,9 @@ package routes
 
 import (
 	"backend/api/handlers"
-	"backend/api/middlewares"
-	"backend/infrastructure/datastores"
 	"backend/infrastructure/identity"
 	"backend/infrastructure/mongomgmt"
 	"backend/use_cases/filemgmtuc"
-	"backend/use_cases/productsuc"
 	"backend/use_cases/usermgmtuc"
 
 	"github.com/gofiber/fiber/v2"
@@ -31,16 +28,6 @@ func InitPublicRoutes(app *fiber.App) {
 func InitProtectedRoutes(app *fiber.App) {
 
 	grp := app.Group("/api/v1")
-
-	productsDataStore := datastores.NewProductsDataStore()
-
-	createProductUseCase := productsuc.NewCreateProductUseCase(productsDataStore)
-	grp.Post("/products", middlewares.NewRequiresRealmRole("admin"),
-		handlers.CreateProductHandler(createProductUseCase))
-
-	getProductsUseCase := productsuc.NewGetProductsUseCase(productsDataStore)
-	grp.Get("/products", middlewares.NewRequiresRealmRole("viewer"),
-		handlers.GetProductsHandler(getProductsUseCase))
 
 	fileManager := mongomgmt.NewFileManager()
 
