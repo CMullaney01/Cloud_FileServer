@@ -32,14 +32,14 @@ func InitProtectedRoutes(app *fiber.App) {
 	fileManager := mongomgmt.NewFileManager()
 
 	uploadFileUseCase := filemgmtuc.NewFileUploadUseCase(fileManager)
-	grp.Post("/files", handlers.UploadFileHandler(uploadFileUseCase))
+	grp.Post("/files/upload", handlers.UploadFileHandler(uploadFileUseCase))
 
 	confirmUploadUseCase := filemgmtuc.NewFileUploadUseCase(fileManager)
-	grp.Post("/files/confirm", handlers.ConfirmUploadHandler(confirmUploadUseCase))
+	grp.Post("/files/upload/confirm", handlers.ConfirmUploadHandler(confirmUploadUseCase))
 
 	downloadFileUseCase := filemgmtuc.NewDownloadFileUseCase(fileManager)
-	grp.Get("/files", handlers.DownloadFileHandler(downloadFileUseCase))
+	grp.Get("/files/download", handlers.DownloadFileHandler(downloadFileUseCase))
 
 	getFilesUseCase := filemgmtuc.NewGetFilesUseCase(fileManager)
-	grp.Get("/filelist", handlers.GetFilesHandler(getFilesUseCase))
+	grp.Get("/files/list", handlers.GetFilesHandler(getFilesUseCase))
 }

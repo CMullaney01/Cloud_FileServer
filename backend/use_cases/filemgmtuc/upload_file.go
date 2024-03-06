@@ -7,7 +7,6 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type UploadFileRequest struct {
@@ -39,7 +38,6 @@ func (uc *uploadFileUseCase) UploadFile(ctx context.Context, userId string, requ
 		return nil, err
 	}
 
-	fileID := primitive.NewObjectID()
 	createdAt := time.Now()
 	isPublic := false // You can set this as required
 
@@ -49,7 +47,6 @@ func (uc *uploadFileUseCase) UploadFile(ctx context.Context, userId string, requ
 	s3Bucket := viper.GetString("AWS_S3_BUCKET")
 
 	var file = &entities.File{
-		ID:          fileID,
 		UserID:      userId,
 		FileName:    request.FileName,
 		S3Bucket:    s3Bucket,
@@ -71,6 +68,7 @@ func (uc *uploadFileUseCase) UploadFile(ctx context.Context, userId string, requ
 	}
 	return response, nil
 }
+
 func (uc *uploadFileUseCase) ConfirmFileUpload(ctx context.Context, userId string, request UploadFileRequest) error {
 	var validate = validator.New()
 	err := validate.Struct(request)
@@ -78,7 +76,6 @@ func (uc *uploadFileUseCase) ConfirmFileUpload(ctx context.Context, userId strin
 		return err
 	}
 
-	fileID := primitive.NewObjectID()
 	createdAt := time.Now()
 	isPublic := false // You can set this as required
 
@@ -88,7 +85,6 @@ func (uc *uploadFileUseCase) ConfirmFileUpload(ctx context.Context, userId strin
 	s3Bucket := viper.GetString("AWS_S3_BUCKET")
 
 	var file = &entities.File{
-		ID:          fileID,
 		UserID:      userId,
 		FileName:    request.FileName,
 		S3Bucket:    s3Bucket,

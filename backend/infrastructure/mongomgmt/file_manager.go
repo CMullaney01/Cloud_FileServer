@@ -71,7 +71,6 @@ func (m *FileManager) GeneratePresignedURL(bucketName, objectKey string, method 
 
 	return presignedURL, nil
 }
-
 func (m *FileManager) Upload(ctx context.Context, file *entities.File) (string, error) {
 	client, err := m.connectToMongoDB(ctx)
 	if err != nil {
@@ -79,29 +78,44 @@ func (m *FileManager) Upload(ctx context.Context, file *entities.File) (string, 
 	}
 	defer client.Disconnect(ctx)
 
-	coll := client.Database("user-data").Collection("files")
-
-	// Check if the file already exists in the collection
-	filter := bson.M{"S3ObjectKey": file.S3ObjectKey}
+	// Check if there's already a file with the same S3ObjectKey in the pending uploads collection
+	pendingColl := client.Database("user-data").Collection("pending_uploads")
+	filter := bson.M{"s3ObjectKey": file.S3ObjectKey}
 	var existingFile entities.File
-	err = coll.FindOne(ctx, filter).Decode(&existingFile)
-	if err == nil {
-		// File already exists, return presigned URL directly
-		presignedURL, err := m.GeneratePresignedURL(existingFile.S3Bucket, existingFile.S3ObjectKey, "PUT", 20*time.Second)
-		if err != nil {
-			return "", errors.Wrap(err, "failed to generate presigned URL")
-		}
-		return presignedURL, nil
-	} else if err != mongo.ErrNoDocuments {
-		// Error occurred while checking for existing file
-		return "", errors.Wrap(err, "failed to check existing file")
+	err = pendingColl.FindOne(ctx, filter).Decode(&existingFile)
+	if err != nil && err != mongo.ErrNoDocuments {
+		return "", errors.Wrap(err, "failed to check pending uploads")
 	}
 
-	// Insert the file details into pending uploads collection
-	pendingColl := client.Database("user-data").Collection("pending_uploads")
+	// If there's an existing file, delete it before inserting the new one
+	if existingFile.S3ObjectKey != "" {
+		_, err = pendingColl.DeleteOne(ctx, filter)
+		if err != nil {
+			return "", errors.Wrap(err, "failed to delete existing file from pending uploads")
+		}
+	}
+
+	// Insert the file details into the pending uploads collection
 	_, err = pendingColl.InsertOne(ctx, file)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to insert pending upload")
+	}
+
+	// Print the contents of pending uploads collection
+	cursor, err := pendingColl.Find(ctx, bson.M{})
+	if err != nil {
+		return "", errors.Wrap(err, "failed to find pending uploads")
+	}
+	defer cursor.Close(ctx)
+	for cursor.Next(ctx) {
+		var pendingFile entities.File
+		if err := cursor.Decode(&pendingFile); err != nil {
+			return "", errors.Wrap(err, "failed to decode pending file")
+		}
+		fmt.Println("Pending Upload:", pendingFile)
+	}
+	if err := cursor.Err(); err != nil {
+		return "", errors.Wrap(err, "cursor error")
 	}
 
 	// Generate presigned URL for the uploaded file
@@ -122,10 +136,11 @@ func (m *FileManager) ConfirmUpload(ctx context.Context, file *entities.File) er
 	defer client.Disconnect(ctx)
 
 	pendingColl := client.Database("user-data").Collection("pending_uploads")
+
 	filesColl := client.Database("user-data").Collection("files")
 
 	// Find the file details in the pending uploads collection
-	filter := bson.M{"S3ObjectKey": file.S3ObjectKey}
+	filter := bson.M{"s3ObjectKey": file.S3ObjectKey}
 	var pendingFile entities.File
 	err = pendingColl.FindOne(ctx, filter).Decode(&pendingFile)
 	if err != nil {
@@ -136,6 +151,21 @@ func (m *FileManager) ConfirmUpload(ctx context.Context, file *entities.File) er
 	}
 
 	// Insert the file details into the files collection
+	var existingFile entities.File
+	err = filesColl.FindOne(ctx, filter).Decode(&existingFile)
+	if err != nil && err != mongo.ErrNoDocuments {
+		return errors.Wrap(err, "failed to check files uploads")
+	}
+
+	// If there's an existing file, delete it before inserting the new one
+	if existingFile.S3ObjectKey != "" {
+		_, err = filesColl.DeleteOne(ctx, filter)
+		if err != nil {
+			return errors.Wrap(err, "failed to delete existing file from files collection")
+		}
+	}
+
+	// insert file to filesColl
 	_, err = filesColl.InsertOne(ctx, pendingFile)
 	if err != nil {
 		return errors.Wrap(err, "failed to insert file into files collection")
