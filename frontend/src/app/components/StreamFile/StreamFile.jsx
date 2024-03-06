@@ -43,7 +43,7 @@ const StreamVideoButton = ({ fileName }) => {
             // Play the video
             video.play();
     
-            router.push("/dashboard"); // Optionally, redirect the user after initiating the stream
+            router.push("/Dashboard"); // Optionally, redirect the user after initiating the stream
         } catch (error) {
             setErrorMsg("Failed to stream video: " + error.message);
         }

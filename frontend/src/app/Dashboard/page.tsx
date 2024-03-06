@@ -9,7 +9,7 @@ import Navbar from '@/app/components/Navbar/Navbar';
 import { File } from '@/app/types/types';
 
 async function listFiles(): Promise<File[]> {
-  const url = `${process.env.AUTH_BACKEND_URL}/api/v1/filelist`;
+  const url = `${process.env.AUTH_BACKEND_URL}/api/v1/files/list`;
 
   let accessToken = await getAccessToken();
 

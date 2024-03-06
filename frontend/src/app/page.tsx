@@ -13,7 +13,7 @@ export default function Home() {
       <div className="page-content mt-6 grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Architecture Cards */}
         <ArchitectureCard />
-        <Link href="/dashboard">
+        <Link href="/Dashboard">
           <DashCard />
         </Link>
         <TutorialCard  />

@@ -51,7 +51,7 @@ const DownloadFileButton = ({ fileName }) => {
             // Clean up by revoking the blob URL
             URL.revokeObjectURL(blobURL);
     
-            router.push("/dashboard"); // Optionally, redirect the user after initiating the download
+            router.push("/Dashboard"); // Optionally, redirect the user after initiating the download
         } catch (error) {
             setErrorMsg("Failed to get download URL: " + error.message);
         }
