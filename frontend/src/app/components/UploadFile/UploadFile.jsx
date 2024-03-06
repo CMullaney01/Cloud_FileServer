@@ -41,27 +41,45 @@ const UploadFile = () => {
         },
         body: JSON.stringify(postBody),
       });
-
-      if (resp.ok) {
-        const data = await resp.json();
-        const presignedURL = data.data.presignedURL
-        // Upload file to S3 using presigned URL
-        const uploadResp = await fetch(presignedURL, {
-          method: "PUT",
-          body: selectedFile,
-          headers: {
-            "Content-Type": selectedFile.type,
-          },
-        });
-
-        if (!uploadResp.ok) {
-          setErrorMsg("Upload failed: " + uploadResp.statusText);
-        }
-        router.push("/dashboard");
-        router.refresh();
-      } else {
+    
+      if (!resp.ok) {
         const json = await resp.json();
         setErrorMsg("Unable to call the API: " + json.error);
+        return;
+      }
+    
+      const data = await resp.json();
+      const presignedURL = data.data.presignedURL.presignedURL;
+      // console.log("presignedURL:", presignedURL)
+      // Upload file to S3 using presigned URL
+      const uploadResp = await fetch(presignedURL, {
+        method: "PUT",
+        body: selectedFile,
+        headers: {
+          "Content-Type": selectedFile.type,
+        },
+      });
+    
+      if (!uploadResp.ok) {
+        setErrorMsg("Upload to S3 failed: " + uploadResp.statusText);
+        return;
+      }
+    
+      // If upload to S3 is successful, confirm the upload
+      const confirmResp = await fetch("/api/files/confirm", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(postBody), // Adjust confirmBody if needed
+      });
+    
+      if (!confirmResp.ok) {
+        setErrorMsg("Upload confirmation failed: " + confirmResp.statusText);
+      } else {
+        // If everything is successful, navigate to the dashboard
+        router.push("/Dashboard");
+        router.refresh();
       }
     } catch (err) {
       setErrorMsg("Unable to call the API: " + err);

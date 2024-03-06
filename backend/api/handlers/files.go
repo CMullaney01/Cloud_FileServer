@@ -14,6 +14,7 @@ import (
 
 type UploadFileUseCase interface {
 	UploadFile(ctx context.Context, userId string, request filemgmtuc.UploadFileRequest) (*filemgmtuc.UploadFileResponse, error)
+	ConfirmFileUpload(ctx context.Context, userId string, request filemgmtuc.UploadFileRequest) error
 }
 
 type DownloadFileUseCase interface {
@@ -22,6 +23,43 @@ type DownloadFileUseCase interface {
 
 type GetFilesUseCase interface {
 	GetFiles(ctx context.Context, userId string) ([]entities.File, error)
+}
+
+func ConfirmUploadHandler(useCase UploadFileUseCase) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		var ctx = c.UserContext()
+
+		// Retrieve the claims from the context
+		claims, ok := ctx.Value(enums.ContextKeyClaims).(golangJwt.MapClaims)
+		if !ok {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Invalid token",
+			})
+		}
+
+		// Access the "username" field from the claims
+		username, ok := claims["preferred_username"].(string)
+		if !ok {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Invalid token",
+			})
+		}
+
+		var request = filemgmtuc.UploadFileRequest{}
+
+		err := c.BodyParser(&request)
+		if err != nil {
+			return errors.Wrap(err, "unable to parse incoming request")
+		}
+
+		// Call the use case method to confirm the file upload
+		err = useCase.ConfirmFileUpload(ctx, username, request)
+		if err != nil {
+			return err
+		}
+
+		return c.SendStatus(fiber.StatusOK)
+	}
 }
 
 func UploadFileHandler(useCase UploadFileUseCase) fiber.Handler {
@@ -51,12 +89,14 @@ func UploadFileHandler(useCase UploadFileUseCase) fiber.Handler {
 			return errors.Wrap(err, "unable to parse incoming request")
 		}
 
-		response, err := useCase.UploadFile(ctx, username, request)
+		presignedURL, err := useCase.UploadFile(ctx, username, request)
 		if err != nil {
 			return err
 		}
 
-		return c.Status(fiber.StatusCreated).JSON(response)
+		return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+			"presignedURL": presignedURL,
+		})
 	}
 }
 

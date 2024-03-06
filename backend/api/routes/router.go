@@ -2,12 +2,9 @@ package routes
 
 import (
 	"backend/api/handlers"
-	"backend/api/middlewares"
-	"backend/infrastructure/datastores"
 	"backend/infrastructure/identity"
 	"backend/infrastructure/mongomgmt"
 	"backend/use_cases/filemgmtuc"
-	"backend/use_cases/productsuc"
 	"backend/use_cases/usermgmtuc"
 
 	"github.com/gofiber/fiber/v2"
@@ -32,24 +29,17 @@ func InitProtectedRoutes(app *fiber.App) {
 
 	grp := app.Group("/api/v1")
 
-	productsDataStore := datastores.NewProductsDataStore()
-
-	createProductUseCase := productsuc.NewCreateProductUseCase(productsDataStore)
-	grp.Post("/products", middlewares.NewRequiresRealmRole("admin"),
-		handlers.CreateProductHandler(createProductUseCase))
-
-	getProductsUseCase := productsuc.NewGetProductsUseCase(productsDataStore)
-	grp.Get("/products", middlewares.NewRequiresRealmRole("viewer"),
-		handlers.GetProductsHandler(getProductsUseCase))
-
 	fileManager := mongomgmt.NewFileManager()
 
 	uploadFileUseCase := filemgmtuc.NewFileUploadUseCase(fileManager)
-	grp.Post("/files", handlers.UploadFileHandler(uploadFileUseCase))
+	grp.Post("/files/upload", handlers.UploadFileHandler(uploadFileUseCase))
+
+	confirmUploadUseCase := filemgmtuc.NewFileUploadUseCase(fileManager)
+	grp.Post("/files/upload/confirm", handlers.ConfirmUploadHandler(confirmUploadUseCase))
 
 	downloadFileUseCase := filemgmtuc.NewDownloadFileUseCase(fileManager)
-	grp.Get("/files", handlers.DownloadFileHandler(downloadFileUseCase))
+	grp.Get("/files/download", handlers.DownloadFileHandler(downloadFileUseCase))
 
 	getFilesUseCase := filemgmtuc.NewGetFilesUseCase(fileManager)
-	grp.Get("/filelist", handlers.GetFilesHandler(getFilesUseCase))
+	grp.Get("/files/list", handlers.GetFilesHandler(getFilesUseCase))
 }

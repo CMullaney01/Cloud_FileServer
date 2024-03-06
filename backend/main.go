@@ -3,17 +3,28 @@ package main
 import (
 	"backend/api/middlewares"
 	"backend/api/routes"
+	"backend/infrastructure/mongomgmt"
+	"context"
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/spf13/viper"
 )
 
 func main() {
+
 	initViper()
 
+	// clean-up pending
+	ctx := context.Background()
+	interval := 1 * time.Minute // clean-up every minute
+	fileManager := mongomgmt.NewFileManager()
+	go fileManager.StartPendingUploadsCleanup(ctx, interval)
+
+	// setup http calls
 	app := fiber.New(fiber.Config{
 		AppName:      "My File Server",
 		ServerHeader: "Fiber",

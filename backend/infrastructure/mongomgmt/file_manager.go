@@ -71,7 +71,6 @@ func (m *FileManager) GeneratePresignedURL(bucketName, objectKey string, method 
 
 	return presignedURL, nil
 }
-
 func (m *FileManager) Upload(ctx context.Context, file *entities.File) (string, error) {
 	client, err := m.connectToMongoDB(ctx)
 	if err != nil {
@@ -79,25 +78,106 @@ func (m *FileManager) Upload(ctx context.Context, file *entities.File) (string, 
 	}
 	defer client.Disconnect(ctx)
 
-	coll := client.Database("user-data").Collection("files")
-
-	filter := bson.M{"S3ObjectKey": file.S3ObjectKey}
-
-	// Perform the replacement operation
-	// stops there being multiple of the same file
-	_, err = coll.ReplaceOne(ctx, filter, file, options.Replace().SetUpsert(true))
-	if err != nil {
-		return "", errors.Wrap(err, "failed to insert or update file")
+	// Check if there's already a file with the same S3ObjectKey in the pending uploads collection
+	pendingColl := client.Database("user-data").Collection("pending_uploads")
+	filter := bson.M{"s3ObjectKey": file.S3ObjectKey}
+	var existingFile entities.File
+	err = pendingColl.FindOne(ctx, filter).Decode(&existingFile)
+	if err != nil && err != mongo.ErrNoDocuments {
+		return "", errors.Wrap(err, "failed to check pending uploads")
 	}
 
+	// If there's an existing file, delete it before inserting the new one
+	if existingFile.S3ObjectKey != "" {
+		_, err = pendingColl.DeleteOne(ctx, filter)
+		if err != nil {
+			return "", errors.Wrap(err, "failed to delete existing file from pending uploads")
+		}
+	}
+
+	// Insert the file details into the pending uploads collection
+	_, err = pendingColl.InsertOne(ctx, file)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to insert pending upload")
+	}
+
+	// // Print the contents of pending uploads collection
+	// cursor, err := pendingColl.Find(ctx, bson.M{})
+	// if err != nil {
+	// 	return "", errors.Wrap(err, "failed to find pending uploads")
+	// }
+	// defer cursor.Close(ctx)
+	// for cursor.Next(ctx) {
+	// 	var pendingFile entities.File
+	// 	if err := cursor.Decode(&pendingFile); err != nil {
+	// 		return "", errors.Wrap(err, "failed to decode pending file")
+	// 	}
+	// 	fmt.Println("Pending Upload:", pendingFile)
+	// }
+	// if err := cursor.Err(); err != nil {
+	// 	return "", errors.Wrap(err, "cursor error")
+	// }
+
 	// Generate presigned URL for the uploaded file
-	presignedURL, err := m.GeneratePresignedURL(file.S3Bucket, file.S3ObjectKey, "PUT", 20*time.Second) // Adjust expiration time as needed
+	presignedURL, err := m.GeneratePresignedURL(file.S3Bucket, file.S3ObjectKey, "PUT", 1*time.Minute) // Adjust expiration time as needed
 	if err != nil {
 		return "", errors.Wrap(err, "failed to generate presigned URL")
 	}
 
 	// Return success response
 	return presignedURL, nil
+}
+
+func (m *FileManager) ConfirmUpload(ctx context.Context, file *entities.File) error {
+	client, err := m.connectToMongoDB(ctx)
+	if err != nil {
+		return errors.Wrap(err, "failed to connect to MongoDB")
+	}
+	defer client.Disconnect(ctx)
+
+	pendingColl := client.Database("user-data").Collection("pending_uploads")
+
+	filesColl := client.Database("user-data").Collection("files")
+
+	// Find the file details in the pending uploads collection
+	filter := bson.M{"s3ObjectKey": file.S3ObjectKey}
+	var pendingFile entities.File
+	err = pendingColl.FindOne(ctx, filter).Decode(&pendingFile)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return errors.New("file not found in pending uploads")
+		}
+		return errors.Wrap(err, "failed to find file in pending uploads")
+	}
+
+	// Insert the file details into the files collection
+	var existingFile entities.File
+	err = filesColl.FindOne(ctx, filter).Decode(&existingFile)
+	if err != nil && err != mongo.ErrNoDocuments {
+		return errors.Wrap(err, "failed to check files uploads")
+	}
+
+	// If there's an existing file, delete it before inserting the new one
+	if existingFile.S3ObjectKey != "" {
+		_, err = filesColl.DeleteOne(ctx, filter)
+		if err != nil {
+			return errors.Wrap(err, "failed to delete existing file from files collection")
+		}
+	}
+
+	// insert file to filesColl
+	_, err = filesColl.InsertOne(ctx, pendingFile)
+	if err != nil {
+		return errors.Wrap(err, "failed to insert file into files collection")
+	}
+
+	// Delete the file details from the pending uploads collection
+	_, err = pendingColl.DeleteOne(ctx, filter)
+	if err != nil {
+		return errors.Wrap(err, "failed to delete file from pending uploads")
+	}
+
+	return nil
 }
 
 func (m *FileManager) List(ctx context.Context, userID string) ([]entities.File, error) {
@@ -156,7 +236,7 @@ func (m *FileManager) Download(ctx context.Context, fileName string, userId stri
 	}
 
 	// Assuming you have a function to generate a pre-signed URL for the file
-	preSignedURL, err := m.GeneratePresignedURL(file.S3Bucket, file.S3ObjectKey, "GET", 20*time.Second)
+	preSignedURL, err := m.GeneratePresignedURL(file.S3Bucket, file.S3ObjectKey, "GET", 1*time.Minute)
 	if err != nil {
 		return "", err
 	}
