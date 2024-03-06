@@ -50,7 +50,7 @@ const UploadFile = () => {
     
       const data = await resp.json();
       const presignedURL = data.data.presignedURL.presignedURL;
-      console.log("presignedURL:", presignedURL)
+      // console.log("presignedURL:", presignedURL)
       // Upload file to S3 using presigned URL
       const uploadResp = await fetch(presignedURL, {
         method: "PUT",

@@ -101,25 +101,25 @@ func (m *FileManager) Upload(ctx context.Context, file *entities.File) (string, 
 		return "", errors.Wrap(err, "failed to insert pending upload")
 	}
 
-	// Print the contents of pending uploads collection
-	cursor, err := pendingColl.Find(ctx, bson.M{})
-	if err != nil {
-		return "", errors.Wrap(err, "failed to find pending uploads")
-	}
-	defer cursor.Close(ctx)
-	for cursor.Next(ctx) {
-		var pendingFile entities.File
-		if err := cursor.Decode(&pendingFile); err != nil {
-			return "", errors.Wrap(err, "failed to decode pending file")
-		}
-		fmt.Println("Pending Upload:", pendingFile)
-	}
-	if err := cursor.Err(); err != nil {
-		return "", errors.Wrap(err, "cursor error")
-	}
+	// // Print the contents of pending uploads collection
+	// cursor, err := pendingColl.Find(ctx, bson.M{})
+	// if err != nil {
+	// 	return "", errors.Wrap(err, "failed to find pending uploads")
+	// }
+	// defer cursor.Close(ctx)
+	// for cursor.Next(ctx) {
+	// 	var pendingFile entities.File
+	// 	if err := cursor.Decode(&pendingFile); err != nil {
+	// 		return "", errors.Wrap(err, "failed to decode pending file")
+	// 	}
+	// 	fmt.Println("Pending Upload:", pendingFile)
+	// }
+	// if err := cursor.Err(); err != nil {
+	// 	return "", errors.Wrap(err, "cursor error")
+	// }
 
 	// Generate presigned URL for the uploaded file
-	presignedURL, err := m.GeneratePresignedURL(file.S3Bucket, file.S3ObjectKey, "PUT", 20*time.Second) // Adjust expiration time as needed
+	presignedURL, err := m.GeneratePresignedURL(file.S3Bucket, file.S3ObjectKey, "PUT", 1*time.Minute) // Adjust expiration time as needed
 	if err != nil {
 		return "", errors.Wrap(err, "failed to generate presigned URL")
 	}
@@ -236,7 +236,7 @@ func (m *FileManager) Download(ctx context.Context, fileName string, userId stri
 	}
 
 	// Assuming you have a function to generate a pre-signed URL for the file
-	preSignedURL, err := m.GeneratePresignedURL(file.S3Bucket, file.S3ObjectKey, "GET", 20*time.Second)
+	preSignedURL, err := m.GeneratePresignedURL(file.S3Bucket, file.S3ObjectKey, "GET", 1*time.Minute)
 	if err != nil {
 		return "", err
 	}
